@@ -59,7 +59,7 @@ import datetime
 
 
 class QA_Fetcher():
-    def __init__(self, uri='mongodb://127.0.0.1:27017/quantaxis', username='', password=''):
+    def __init__(self, uri='mongodb://127.0.0.1:27017/quantaxis', username='quantaxis', password='quantaxis'):
         """
         初始化的时候 会初始化
         """

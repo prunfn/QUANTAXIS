@@ -82,8 +82,12 @@ if HAS_QARS:
     # 打印性能提示
     import sys
     if not sys.flags.quiet:
-        print(f"✨ QARS2 Rust核心已启用 (版本 {QARS_VERSION})")
-        print(f"   性能提升: 账户操作100x, 回测10x, 数据处理5-10x")
+        try:
+            print(f"✨ QARS2 Rust核心已启用 (版本 {QARS_VERSION})")
+            print(f"   性能提升: 账户操作100x, 回测10x, 数据处理5-10x")
+        except UnicodeEncodeError:
+            print(f"[OK] QARS2 Rust核心已启用 (版本 {QARS_VERSION})")
+            print(f"   性能提升: 账户操作100x, 回测10x, 数据处理5-10x")
 
 else:
     # 提供Python fallback (QIFI_Account可用; QARSBacktest需qars3)
@@ -98,8 +102,12 @@ else:
 
     import sys
     if not sys.flags.quiet:
-        print("⚠ 使用Python实现 (未检测到QARS2)")
-        print("  建议: pip install quantaxis[rust] 获得100x性能提升")
+        try:
+            print("⚠ 使用Python实现 (未检测到QARS2)")
+            print("  建议: pip install quantaxis[rust] 获得100x性能提升")
+        except UnicodeEncodeError:
+            print("[!] 使用Python实现 (未检测到QARS2)")
+            print("  建议: pip install quantaxis[rust] 获得100x性能提升")
 
 
 # ============================================================================

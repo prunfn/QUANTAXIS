@@ -7,7 +7,10 @@ import numpy as np
 import pandas as pd
 import pymongo
 from pymongo import message
-from qaenv import mongo_ip, clickhouse_ip, clickhouse_password, clickhouse_port, clickhouse_user
+from qaenv import mongo_ip as _qaenv_mongo_ip, clickhouse_ip, clickhouse_password, clickhouse_port, clickhouse_user
+from QUANTAXIS.QAUtil.QASetting import QASETTING
+
+mongo_ip = QASETTING.mongo_uri if QASETTING.mongo_uri else _qaenv_mongo_ip
 from QUANTAXIS.QAMarket.market_preset import MARKET_PRESET
 from QUANTAXIS.QAMarket.QAOrder import ORDER_DIRECTION
 from QUANTAXIS.QAMarket.QAPosition import QA_Position

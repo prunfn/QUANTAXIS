@@ -37,8 +37,17 @@ from QUANTAXIS.QAUtil.QASql import (
 # 貌似yutian已经进行了，文件的创建步骤，他还会创建一个setting的dir
 # 需要与yutian讨论具体配置文件的放置位置 author:Will 2018.5.19
 
-DEFAULT_MONGO = os.getenv('MONGODB', 'localhost')
-DEFAULT_DB_URI = 'mongodb://{}:27017'.format(DEFAULT_MONGO)
+_mongo_host = os.getenv('MONGODB', 'localhost')
+_mongo_port = os.getenv('MONGODBPORT', '27017')
+_mongo_user = os.getenv('MONGODB_USER', '')
+_mongo_pwd = os.getenv('MONGODB_PWD', '')
+if _mongo_user and _mongo_pwd:
+    DEFAULT_DB_URI = 'mongodb://{}:{}@{}:{}/quantaxis?authSource=admin'.format(
+        _mongo_user, _mongo_pwd, _mongo_host, _mongo_port)
+else:
+    DEFAULT_DB_URI = 'mongodb://{}:{}'.format(_mongo_host, _mongo_port)
+# MONGODB_URI 可完全覆盖
+DEFAULT_DB_URI = os.getenv('MONGODB_URI', DEFAULT_DB_URI)
 CONFIGFILE_PATH = '{}{}{}'.format(setting_path, os.sep, 'config.ini')
 INFO_IP_FILE_PATH = '{}{}{}'.format(setting_path, os.sep, 'info_ip.json')
 STOCK_IP_FILE_PATH = '{}{}{}'.format(setting_path, os.sep, 'stock_ip.json')

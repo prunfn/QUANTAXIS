@@ -5,7 +5,10 @@ from QUANTAXIS.QAFactor.featureView import QAFeatureView
 from QUANTAXIS.QIFI.QifiAccount import QIFI_Account
 from QUANTAXIS.QAFetch.QAClickhouse import QACKClient
 from dateutil import parser
-from qaenv import clickhouse_ip, clickhouse_password, clickhouse_user, clickhouse_port, mongo_ip
+from qaenv import clickhouse_ip, clickhouse_password, clickhouse_user, clickhouse_port, mongo_ip as _qaenv_mongo_ip
+from QUANTAXIS.QAUtil.QASetting import QASETTING
+
+mongo_ip = QASETTING.mongo_uri if QASETTING.mongo_uri else _qaenv_mongo_ip
 
 """
 backtest for feature data

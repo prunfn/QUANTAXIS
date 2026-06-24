@@ -1,9 +1,9 @@
 import QUANTAXIS as QA
 import pandas as pd
-clickhouse_port = 9001
+clickhouse_port = 8123
 clickhouse_ip = 'localhost'
-clickhouse_user = 'admin'
-clickhouse_password = 'admin'
+clickhouse_user = 'quantaxis'
+clickhouse_password = 'quantaxis'
 
 
 class MA(QA.QASingleFactor_DailyBase):

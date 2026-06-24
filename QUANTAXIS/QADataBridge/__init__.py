@@ -43,8 +43,8 @@ try:
     import qadataswap
     HAS_DATASWAP = True
     DATASWAP_VERSION = getattr(qadataswap, 'get_version', lambda: 'unknown')()
-    HAS_ARROW = qadataswap.has_arrow_support()
-except ImportError:
+    HAS_ARROW = getattr(qadataswap, 'has_arrow_support', lambda: False)()
+except (ImportError, AttributeError):
     HAS_DATASWAP = False
     DATASWAP_VERSION = None
     HAS_ARROW = False
@@ -99,9 +99,14 @@ if HAS_DATASWAP:
     # 打印提示
     import sys
     if not sys.flags.quiet:
-        print(f"✨ QADataSwap已启用 (版本 {DATASWAP_VERSION})")
-        print(f"   零拷贝数据传输: Pandas ↔ Polars ↔ Arrow")
-        print(f"   Arrow支持: {'是' if HAS_ARROW else '否'}")
+        try:
+            print(f"✨ QADataSwap已启用 (版本 {DATASWAP_VERSION})")
+            print(f"   零拷贝数据传输: Pandas <-> Polars <-> Arrow")
+            print(f"   Arrow支持: {'是' if HAS_ARROW else '否'}")
+        except UnicodeEncodeError:
+            print(f"[OK] QADataSwap已启用 (版本 {DATASWAP_VERSION})")
+            print(f"   零拷贝数据传输: Pandas <-> Polars <-> Arrow")
+            print(f"   Arrow支持: {'是' if HAS_ARROW else '否'}")
 
 else:
     # 提供Python fallback (使用标准序列化)
@@ -161,8 +166,12 @@ else:
 
     import sys
     if not sys.flags.quiet:
-        print("⚠ 使用Python fallback (未检测到QADataSwap)")
-        print("  建议: pip install quantaxis[rust] 获得5-10x数据传输加速")
+        try:
+            print("⚠ 使用Python fallback (未检测到QADataSwap)")
+            print("  建议: pip install quantaxis[rust] 获得5-10x数据传输加速")
+        except UnicodeEncodeError:
+            print("[!] 使用Python fallback (未检测到QADataSwap)")
+            print("  建议: pip install quantaxis[rust] 获得5-10x数据传输加速")
 
 
 # ============================================================================

@@ -39,6 +39,40 @@ from pytdx.errors import TdxFunctionCallError, TdxConnectionError
 from retrying import retry
 
 
+# Monkey-patch: 修复 pytdx 在 Windows 上 GBK 解码股票名称失败的 bug
+def _patch_pytdx_gbk():
+    """修复 pytdx get_security_list 中股票名称 GBK 解码失败的问题"""
+    from pytdx.parser.get_security_list import GetSecurityList
+    _orig_parse = GetSecurityList.parseResponse
+    def _patched_parse(self, body_buf):
+        import struct
+        from collections import OrderedDict
+        from pytdx.helper import get_volume
+        pos = 0
+        (num,) = struct.unpack("<H", body_buf[:2])
+        pos += 2
+        stocks = []
+        for i in range(num):
+            one_bytes = body_buf[pos: pos + 29]
+            (code, volunit, name_bytes, reversed_bytes1, decimal_point,
+             pre_close_raw, reversed_bytes2) = struct.unpack("<6sH8s4sBI4s", one_bytes)
+            code = code.decode("utf-8")
+            try:
+                name = name_bytes.decode("gbk").rstrip("\x00")
+            except UnicodeDecodeError:
+                name = name_bytes.decode("gb18030", errors="replace").rstrip("\x00")
+            pre_close = get_volume(pre_close_raw)
+            pos += 29
+            stocks.append(OrderedDict([
+                ('code', code), ('volunit', volunit),
+                ('decimal_point', decimal_point), ('name', name),
+                ('pre_close', pre_close),
+            ]))
+        return stocks
+    GetSecurityList.parseResponse = _patched_parse
+
+_patch_pytdx_gbk()
+
 from QUANTAXIS.QAFetch.base import _select_market_code, _select_index_code, _select_type, _select_bond_market_code
 from QUANTAXIS.QAUtil import (QA_Setting, QA_util_date_stamp, QA_util_code_tostr,
                               QA_util_date_str2int, QA_util_date_valid,

@@ -11,7 +11,11 @@ with warnings.catch_warnings():
     import pyfolio as pf
 import pymongo
 import QUANTAXIS as QA
-from qaenv import mongo_ip
+from qaenv import mongo_ip as _qaenv_mongo_ip
+from QUANTAXIS.QAUtil.QASetting import QASETTING
+
+# 优先使用 QASETTING 的 mongo_uri (支持认证)，fallback 到 qaenv.mongo_ip
+mongo_ip = QASETTING.mongo_uri if QASETTING.mongo_uri else _qaenv_mongo_ip
 
 #mongo_ip = '192.168.2.117'
 

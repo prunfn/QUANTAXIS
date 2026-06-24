@@ -12,7 +12,10 @@ import pandas as pd
 import pymongo
 import requests
 from qaenv import (eventmq_amqp, eventmq_ip, eventmq_password, eventmq_port,
-                   eventmq_username, mongo_ip, mongo_uri)
+                   eventmq_username, mongo_ip as _qaenv_mongo_ip)
+from QUANTAXIS.QAUtil.QASetting import QASETTING
+
+mongo_ip = QASETTING.mongo_uri if QASETTING.mongo_uri else _qaenv_mongo_ip
 from QUANTAXIS.QAPubSub.consumer import subscriber, subscriber_routing, subscriber_topic
 from QUANTAXIS.QAPubSub.producer import publisher_routing, publisher_topic
 

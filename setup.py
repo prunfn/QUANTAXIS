@@ -61,8 +61,9 @@ with io.open('QUANTAXIS/__init__.py', 'rt', encoding='utf8') as f:
 
 try:
     if sys.platform in ['win32', 'darwin']:
-        print(webbrowser.open(
-            'https://github.com/QUANTAXIS/QUANTAXIS/releases'))
+        # No need open url
+        # print(webbrowser.open(
+        #     'https://github.com/QUANTAXIS/QUANTAXIS/releases'))
         print('finish install')
 except:
     pass
@@ -70,7 +71,7 @@ except:
 
 def read(fname):
 
-    return codecs.open(os.path.join(os.path.dirname(__file__), fname)).read()
+    return codecs.open(os.path.join(os.path.dirname(__file__), fname), 'r', encoding='utf-8').read()
 
 
 NAME = "quantaxis"
@@ -129,7 +130,7 @@ URL = "https://github.com/quantaxis/quantaxis"
 
 LICENSE = "MIT"
 
-with open('requirements.txt') as reqs_file:
+with open('requirements.txt', encoding='utf-8') as reqs_file:
     INSTALL_REQUIRES = [
         line.strip() for line in reqs_file
         if line.strip() and not line.strip().startswith('#')

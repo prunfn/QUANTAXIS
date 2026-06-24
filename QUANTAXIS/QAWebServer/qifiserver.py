@@ -1,6 +1,9 @@
 
-from qaenv import mongo_ip
+from qaenv import mongo_ip as _qaenv_mongo_ip
+from QUANTAXIS.QAUtil.QASetting import QASETTING
 from QUANTAXIS.QAWebServer.basehandles import QABaseHandler
+
+mongo_ip = QASETTING.mongo_uri if QASETTING.mongo_uri else _qaenv_mongo_ip
 from QUANTAXIS.QAUtil import QA_util_to_json_from_pandas
 from QUANTAXIS.QIFI.QifiManager import QA_QIFIMANAGER, QA_QIFISMANAGER
 class QAQIFI_Handler(QABaseHandler):

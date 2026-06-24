@@ -4,7 +4,7 @@ import threading
 import pymongo
 from apscheduler.jobstores.mongodb import MongoDBJobStore
 from apscheduler.schedulers.tornado import TornadoScheduler
-from qaenv import mongo_ip, mongo_port
+from QUANTAXIS.QAUtil.QASetting import QASETTING
 from QUANTAXIS.QAWebServer.basehandles import QABaseHandler
 from tornado.ioloop import IOLoop, PeriodicCallback
 from tornado.web import Application, RequestHandler
@@ -22,7 +22,7 @@ job_ids = []
 def init_scheduler(database='qascheduler', collection='jobs'):
 
     jobstores = {
-        'default': MongoDBJobStore(database=database, collection=collection, client=pymongo.MongoClient(host=mongo_ip, port=mongo_port))
+        'default': MongoDBJobStore(database=database, collection=collection, client=pymongo.MongoClient(QASETTING.mongo_uri))
     }
     global scheduler
     scheduler = TornadoScheduler(jobstores=jobstores)
