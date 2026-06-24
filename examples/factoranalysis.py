@@ -1,6 +1,6 @@
 import QUANTAXIS as QA
 import pandas as pd
-clickhouse_port = 8123
+clickhouse_port = 9000
 clickhouse_ip = 'localhost'
 clickhouse_user = 'quantaxis'
 clickhouse_password = 'quantaxis'

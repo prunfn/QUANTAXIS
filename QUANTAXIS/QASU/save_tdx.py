@@ -269,16 +269,39 @@ def QA_SU_save_stock_day(client=DATABASE, ui_log=None, ui_progress=None):
                     ui_log
                 )
                 if start_date != end_date:
-                    coll_stock_day.insert_many(
-                        QA_util_to_json_from_pandas(
-                            QA_fetch_get_stock_day(
+                    try:
+                        __data = QA_fetch_get_stock_day(
+                            str(code),
+                            start_date,
+                            end_date,
+                            '00'
+                        )
+                        if __data is not None and len(__data) > 0:
+                            coll_stock_day.insert_many(
+                                QA_util_to_json_from_pandas(__data)
+                            )
+                        else:
+                            raise ValueError('empty data from TDX')
+                    except Exception:
+                        fallback_start = '2020-01-01'
+                        QA_util_log_info(
+                            'Retry updating {} from {} to {}'
+                            .format(code, fallback_start, end_date),
+                            ui_log
+                        )
+                        try:
+                            __data = QA_fetch_get_stock_day(
                                 str(code),
-                                start_date,
+                                fallback_start,
                                 end_date,
                                 '00'
                             )
-                        )
-                    )
+                            if __data is not None and len(__data) > 0:
+                                coll_stock_day.insert_many(
+                                    QA_util_to_json_from_pandas(__data)
+                                )
+                        except Exception as e2:
+                            raise e2
         except Exception as error0:
             print(error0)
             err.append(str(code))

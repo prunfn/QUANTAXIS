@@ -114,8 +114,8 @@ def _QA_data_stock_to_fq(bfq_data, xdxr_data, fqtype):
             axis=1
         )
 
-        data['if_trade'].fillna(value=0, inplace=True)
-        data = data.fillna(method='ffill')
+        data['if_trade'] = data['if_trade'].fillna(value=0)
+        data = data.ffill()
 
         data = pd.concat(
             [

@@ -9,7 +9,8 @@
 ## 目录
 
 1. [本地开发（不安装）](#1-本地开发不安装到系统)
-2. [pip install 使用](#2-pip-install-后使用)
+2. [pip install 使用](#2-pip-install-后使用)\
+   &nbsp;&nbsp;2.1 [CLI 命令完整参考](#cli-命令完整参考)
 3. [Docker 部署](#3-docker-部署使用)
 4. [多市场数据采集](#5-多市场数据采集)
 5. [技术指标计算](#6-技术指标计算)
@@ -91,15 +92,182 @@ qarun           # 策略执行器
 qawebserver     # Web API 服务 (端口 8010)
 ```
 
-CLI 常用命令：
+### CLI 命令完整参考
+
+进入 `quantaxis` 交互式 Shell 后（提示符 `QUANTAXIS>`），可用以下命令：
+
+#### 系统命令
+
+| 命令 | 说明 |
+|------|------|
+| `help` | 列出所有可用命令 |
+| `help <cmd>` | 查看某个命令的帮助（如 `help save`） |
+| `version` | 显示 QUANTAXIS 版本号 |
+| `quit` / `exit` | 退出 CLI |
+| `clean` | 清理旧的回测报告和日志文件 |
+| `fn <python表达式>` | 直接执行 Python 代码 |
+| `shell <命令>` | 执行系统 Shell 命令 |
+| `ls` | 显示当前文件路径 |
+| `examples` | 下载 QADemo 示例项目到当前目录 |
+| `drop_database` | 重置 quantaxis 数据库（⚠ 危险操作） |
+| `download_updatex` | 下载 update_x.py 更新脚本 |
+| `download_updateall` | 下载 update_all.py 更新脚本 |
+
+#### crawl — 网页爬虫
+
 ```
-QA> save stock_list tdx          # 保存股票列表
-QA> save stock_day tdx           # 保存全市场日线
-QA> save stock_day tdx paralleled=true   # 并行模式
-QA> save stock_min tdx           # 保存分钟线
-QA> save index_day tdx           # 保存指数日线
-QA> save future_day tdx          # 保存期货日线
-QA> save future_min tdx          # 保存期货分钟线
+QUANTAXIS> crawl eastmoney zjlx <股票代码>      # 抓取东方财富资金流向
+QUANTAXIS> crawl eastmoney zjlx all              # 全市场东方财富资金流向
+QUANTAXIS> crawl jrj zjlx <股票代码>              # 抓取金融界资金流向（未实现）
+QUANTAXIS> crawl 10jqka funds <股票代码>          # 抓取同花顺资金流向（未实现）
+```
+
+#### save — 数据保存（核心命令）
+
+`save` 是最高频的命令。支持**快捷模式**（一键多任务）和**精确模式**（单独保存某个数据类型）。
+
+**快捷模式 — 一键批量保存：**
+
+| 命令 | 实际操作 | 耗时 | 说明 |
+|------|---------|------|------|
+| `save all` | stock_day + xdxr + index_day + etf_list + index_list + stock_list + block | ~30min | 日线全家桶，约 1G |
+| `save day` | 同 `save all` + etf_day | ~30min | 日线全家桶增强版 |
+| `save min` | stock_min + xdxr + index_min + etf_min + stock_list + index_list | ~数小时 | 分钟线全家桶 |
+| `save X` / `save x` | day + min + future_list + block | ~半天 | 完整数据（日线+分钟线） |
+| `save transaction` | stock_transaction + index_transaction | 很久 | 逐笔成交（⚠ 磁盘消耗极大） |
+| `save future` | future_day + future_min + future_list | ~30min | 期货全家桶 |
+| `save future_all` | future_day_all + future_min_all + future_list | ~1h | 期货含合约信息 |
+| `save option` | option_contract_list + option_day_all + option_min_all | ~1h | 期权全家桶 |
+
+**精确模式 — A 股股票：**
+
+| 命令 | 说明 |
+|------|------|
+| `save stock_day` | 全市场日线（增量更新，最常用） |
+| `save stock_min` | 全市场分钟线（1min/5min/15min/30min/60min） |
+| `save stock_xdxr` | 除权除息数据 |
+| `save stock_list` | 股票列表（5211只） |
+| `save stock_block` | 板块信息 |
+| `save stock_info` | 股票基本信息（Tushare 源） |
+| `save stock_transaction` | 逐笔成交数据 |
+| `save single_stock_day <code>` | 单只股票日线，如 `save single_stock_day 000001` |
+| `save single_stock_min <code>` | 单只股票分钟线 |
+
+**精确模式 — 指数：**
+
+| 命令 | 说明 |
+|------|------|
+| `save index_day` | 全市场指数日线 |
+| `save index_min` | 全市场指数分钟线 |
+| `save index_list` | 指数列表 |
+| `save index_transaction` | 指数逐笔成交 |
+| `save single_index_day <code>` | 单个指数日线 |
+| `save single_index_min <code>` | 单个指数分钟线 |
+
+**精确模式 — ETF：**
+
+| 命令 | 说明 |
+|------|------|
+| `save etf_day` | ETF 日线 |
+| `save etf_min` | ETF 分钟线 |
+| `save etf_list` | ETF 列表 |
+| `save single_etf_day <code>` | 单个 ETF 日线 |
+| `save single_etf_min <code>` | 单个 ETF 分钟线 |
+
+**精确模式 — 期货：**
+
+| 命令 | 说明 |
+|------|------|
+| `save future_day` | 期货日线 |
+| `save future_min` | 期货分钟线 |
+| `save future_list` | 期货合约列表 |
+| `save future_day_all` | 所有期货日线（含合约信息） |
+| `save future_min_all` | 所有期货分钟线（含合约信息） |
+| `save single_future_day <code>` | 单个期货日线 |
+| `save single_future_min <code>` | 单个期货分钟线 |
+
+**精确模式 — 债券：**
+
+| 命令 | 说明 |
+|------|------|
+| `save bond_day` | 债券日线 |
+| `save bond_min` | 债券分钟线 |
+| `save bond_list` | 债券列表 |
+| `save single_bond_day <code>` | 单个债券日线 |
+| `save single_bond_min <code>` | 单个债券分钟线 |
+
+**精确模式 — 期权：**
+
+| 命令 | 说明 |
+|------|------|
+| `save option_contract_list` | 期权合约列表 |
+| `save option_day_all` | 所有期权日线 |
+| `save option_min_all` | 所有期权分钟线 |
+| `save 50etf_option_day` | 50ETF 期权日线 |
+| `save 50etf_option_min` | 50ETF 期权分钟线 |
+| `save 300etf_option_day` | 300ETF 期权日线 |
+| `save 300etf_option_min` | 300ETF 期权分钟线 |
+| `save option_commodity_day` | 商品期权日线 |
+| `save option_commodity_min` | 商品期权分钟线 |
+
+**精确模式 — Tushare 源：**
+
+| 命令 | 说明 |
+|------|------|
+| `save stock_list tushare` | 从 Tushare 保存股票列表（TDX 不可用时备用） |
+| `save ts_all` | Tushare 全量基本面数据 |
+| `save ts_financial` | Tushare 财务报告 |
+| `save ts_daily` | Tushare 日线基本面 |
+| `save financialfiles` | 高级财务数据（自 1996 年起） |
+
+**精确模式 — 加密货币：**
+
+| 命令 | 说明 |
+|------|------|
+| `save binance` | 币安日/小时/分钟线 |
+| `save binance all` | 币安全频率（日/时/30/15/5/1分钟） |
+| `save binance <频率>` | 币安单频率（1day/1hour/1min/30m/15m/5m） |
+| `save bitfinex` | Bitfinex 日/小时/分钟线 |
+| `save bitfinex all` | Bitfinex 全频率 |
+| `save bitmex` | BitMEX 日/小时/分钟线 |
+| `save huobi` | 火币日/小时/分钟线 |
+| `save huobi all` | 火币全频率 |
+| `save huobi realtime` | 火币实时行情（前 30 币种） |
+| `save okex` | OKEx 日/小时/分钟线 |
+| `save okex all` | OKEx 全频率 |
+| `save okex <频率>` | OKEx 单频率（86400/3600/1800/900/300/60） |
+
+#### 通用命令语法
+
+`save` 命令支持通用的 `save <函数名>` 语法，可以直接调用任何 `QA_SU_save_*('tdx')` 函数：
+
+```
+QUANTAXIS> save stock_day              # → QA_SU_save_stock_day('tdx')
+QUANTAXIS> save stock_min              # → QA_SU_save_stock_min('tdx')
+QUANTAXIS> save future_list            # → QA_SU_save_future_list('tdx')
+```
+
+### CLI 常用操作流程
+
+```bash
+(quantaxis) PS> quantaxis
+QUANTAXIS>
+
+# 首次使用 — 初始化数据
+QUANTAXIS> save stock_list            # 1. 先存股票列表 (~30秒)
+QUANTAXIS> save stock_day             # 2. 全市场日线 (~30分钟) 支持断点续传
+QUANTAXIS> save stock_xdxr            # 3. 除权除息 (~1分钟)
+QUANTAXIS> save index_day             # 4. 指数日线 (~1分钟)
+QUANTAXIS> save stock_block           # 5. 板块信息 (~30秒)
+
+# 进阶 — 分钟线和期货
+QUANTAXIS> save stock_min             # 分钟线 (~数小时)
+QUANTAXIS> save future                # 期货全家桶
+
+# 日常维护 — 增量更新
+QUANTAXIS> save stock_day             # 每天只抓新增数据
+QUANTAXIS> save index_day
+QUANTAXIS> quit
 ```
 
 ### 启动全部服务
