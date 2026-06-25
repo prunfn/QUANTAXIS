@@ -1357,19 +1357,26 @@ def QA_fetch_get_stock_block(ip=None, port=None):
     ip, port = get_mainmarket_ip(ip, port)
     api = TdxHq_API(raise_exception=True)
     with api.connect(ip, port):
-        data = pd.concat([
-            api.to_df(api.get_and_parse_block_info("block.dat"   )).assign(type="yb"),
-            api.to_df(api.get_and_parse_block_info("block_fg.dat")).assign(type="fg"),
-            api.to_df(api.get_and_parse_block_info("block_gn.dat")).assign(type="gn"),
-            api.to_df(api.get_and_parse_block_info("block_zs.dat")).assign(type="zs"),
-            api.to_df(api.get_and_parse_block_info("hkblock.dat" )).assign(type="hk"),
-            api.to_df(api.get_and_parse_block_info("jjblock.dat" )).assign(type="jj"),
-            # api.to_df(api.get_and_parse_block_info("mgblock.dat" )).assign(type="mg"),
-            # api.to_df(api.get_and_parse_block_info("sbblock.dat" )).assign(type="sb"),
-            # api.to_df(api.get_and_parse_block_info("spblock.dat" )).assign(type="sp"),
-            # api.to_df(api.get_and_parse_block_info("ukblock.dat" )).assign(type="uk"),
-        ], sort=False)
-        incon_content = api.get_block_dat_ver_up("incon.dat").decode("GB18030")# tdx industry file 行业代码名字对照表文件, 有#号分段
+        def _safe_get_block(file_name, type_label):
+            try:
+                return api.to_df(api.get_and_parse_block_info(file_name)).assign(type=type_label)
+            except Exception:
+                return None
+
+        blocks = [
+            _safe_get_block("block.dat", "yb"),
+            _safe_get_block("block_fg.dat", "fg"),
+            _safe_get_block("block_gn.dat", "gn"),
+            _safe_get_block("block_zs.dat", "zs"),
+            _safe_get_block("hkblock.dat", "hk"),
+            _safe_get_block("jjblock.dat", "jj"),
+        ]
+        blocks = [b for b in blocks if b is not None]
+        data = pd.concat(blocks, sort=False) if blocks else pd.DataFrame()
+        try:
+            incon_content = api.get_block_dat_ver_up("incon.dat").decode("GB18030")
+        except (AttributeError, Exception):
+            incon_content = None  # pytdx 版本可能不支持此方法
 
     if incon_content and len(incon_content) > 100:
         incon_block_info = _parse_block_name_info(incon_content)

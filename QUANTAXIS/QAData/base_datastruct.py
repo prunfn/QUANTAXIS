@@ -1080,10 +1080,10 @@ class _quotation_base():
             func {[type]} -- [description]
 
         Returns:
-            [type] -- [description]
+            DataStruct — 返回新的 DataStruct 以支持链式调用
         """
-
-        return self.groupby(level=1, sort=False).apply(func, *arg, **kwargs)
+        result = self.groupby(level=1, sort=False).apply(func, *arg, **kwargs)
+        return self.new(result)
 
     def add_funcx(self, func, *arg, **kwargs):
         """QADATASTRUCT的指标/函数apply入口

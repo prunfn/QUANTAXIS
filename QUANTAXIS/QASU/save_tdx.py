@@ -2014,8 +2014,8 @@ def QA_SU_save_stock_block(client=DATABASE, ui_log=None, ui_progress=None):
         )
     except Exception as e:
         QA_util_log_info(e, ui_log=ui_log)
-        print(" Error save_tdx.QA_SU_save_stock_block exception!")
-        pass
+        print(" Warning: TDX stock_block failed (某些块文件可能不可用), 继续运行...")
+        # 不影响整体流程，stock_block 非核心数据
 
 
 def QA_SU_save_stock_info(client=DATABASE, ui_log=None, ui_progress=None):

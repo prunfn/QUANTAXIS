@@ -1030,9 +1030,9 @@ def QA_fetch_stock_block(
                axis=1)
         return data.set_index('code', drop=False)
     else:
-        data = pd.DataFrame([item for item in collections.find()]
-                           ).drop(['_id'],
-                                  axis=1)
+        data = pd.DataFrame([item for item in collections.find()])
+        if '_id' in data.columns:
+            data = data.drop(['_id'], axis=1, errors='ignore')
         return data.set_index('code', drop=False)
 
 
