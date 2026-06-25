@@ -135,7 +135,7 @@ def format_bitfinex_data_fields(datas, symbol, frequency):
         axis=1
     )
     if (frequency not in ['1day', 'day', '86400', '1d']):
-        frame['type'] = OKEx2QA_FREQUENCY_DICT[frequency]
+        frame['type'] = OKX2QA_FREQUENCY_DICT[frequency]
     return frame
 
 
@@ -185,7 +185,7 @@ def QA_fetch_bitfinex_kline_with_auto_retry(
     HTTP请求 GET/api/spot/v3/instruments/<instrument_id>/candles
     """
     url = urljoin(
-        OKEx_base_url,
+        OKX_base_url,
         "/api/spot/v3/instruments/{:s}/candles".format(symbol)
     )
     retries = 1
@@ -239,7 +239,7 @@ def QA_fetch_bitfinex_kline(
     Get the latest symbol‘s candlestick data
     时间倒序切片获取算法，是各大交易所获取1min数据的神器，因为大部分交易所直接请求跨月跨年的1min分钟数据
     会直接返回空值，只有将 start_epoch，end_epoch 切片细分到 200/300 bar 以内，才能正确返回 kline，
-    火币和binance，OKEx 均为如此，直接用跨年时间去直接请求上万bar 的 kline 数据永远只返回最近200条数据。
+    火币和binance，OKX 均为如此，直接用跨年时间去直接请求上万bar 的 kline 数据永远只返回最近200条数据。
     """
     datas = list()
     reqParams = {}
@@ -266,7 +266,7 @@ def QA_fetch_bitfinex_kline(
             reqParams['from'] = int(reqParams['from'] - FREQUENCY_SHIFTING[frequency])
             continue
 
-        klines = QA_fetch_okex_kline_with_auto_retry(
+        klines = QA_fetch_okx_kline_with_auto_retry(
             symbol,
             reqParams['from'],
             reqParams['to'],
@@ -289,14 +289,14 @@ def QA_fetch_bitfinex_kline(
         datas.extend(klines)
 
         if (callback_func is not None):
-            frame = format_okex_data_fields(klines, symbol, frequency)
-            callback_func(frame, OKEx2QA_FREQUENCY_DICT[frequency])
+            frame = format_okx_data_fields(klines, symbol, frequency)
+            callback_func(frame, OKX2QA_FREQUENCY_DICT[frequency])
 
     if len(datas) == 0:
         return None
 
     # 归一化数据字段，转换填充必须字段，删除多余字段
-    frame = format_okex_data_fields(datas, symbol, frequency)
+    frame = format_okx_data_fields(datas, symbol, frequency)
     return frame
 
 
@@ -311,7 +311,7 @@ def QA_fetch_bitfinex_kline_min(
     Get the latest symbol‘s candlestick data with time slices
     时间倒序切片获取算法，是各大交易所获取1min数据的神器，因为大部分交易所直接请求跨月跨年的1min分钟数据
     会直接返回空值，只有将 start_epoch，end_epoch 切片细分到 200/300 bar 以内，才能正确返回 kline，
-    火币和binance，OKEx 均为如此，用上面那个函数的方式去直接请求上万bar 的分钟 kline 数据是不会有结果的。
+    火币和binance，OKX 均为如此，用上面那个函数的方式去直接请求上万bar 的分钟 kline 数据是不会有结果的。
     """
     reqParams = {}
     reqParams['from'] = end_time - FREQUENCY_SHIFTING[frequency]
@@ -339,7 +339,7 @@ def QA_fetch_bitfinex_kline_min(
             reqParams['from'] = int(reqParams['from'] - FREQUENCY_SHIFTING[frequency])
             continue
 
-        klines = QA_fetch_okex_kline_with_auto_retry(
+        klines = QA_fetch_okx_kline_with_auto_retry(
             symbol,
             reqParams['from'],
             reqParams['to'],
@@ -355,8 +355,8 @@ def QA_fetch_bitfinex_kline_min(
         reqParams['from'] = int(reqParams['from'] - FREQUENCY_SHIFTING[frequency])
 
         if (callback_func is not None):
-            frame = format_okex_data_fields(klines, symbol, frequency)
-            callback_func(frame, OKEx2QA_FREQUENCY_DICT[frequency])
+            frame = format_okx_data_fields(klines, symbol, frequency)
+            callback_func(frame, OKX2QA_FREQUENCY_DICT[frequency])
 
         if (len(klines) == 0):
             return None

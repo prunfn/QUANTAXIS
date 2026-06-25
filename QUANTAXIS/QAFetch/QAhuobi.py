@@ -71,6 +71,10 @@ TIMEOUT = 10
 ILOVECHINA = "同学！！你知道什么叫做科学上网么？ 如果你不知道的话，那么就加油吧！蓝灯，喵帕斯，VPS，阴阳师，v2ray，随便什么来一个！我翻墙我骄傲！"
 Huobi_base_url = 'https://api.huobi.pro/'
 
+import os as _os
+_proxy_url = _os.environ.get('QA_PROXY') or _os.environ.get('HTTPS_PROXY') or _os.environ.get('https_proxy') or _os.environ.get('HTTP_PROXY') or _os.environ.get('http_proxy') or ''
+PROXIES = {'http': _proxy_url, 'https': _proxy_url} if _proxy_url else None
+
 
 FIRST_PRIORITY = [
     'atomusdt',
@@ -109,7 +113,7 @@ def QA_fetch_huobi_symbols():
     datas = list()
     while (retries != 0):
         try:
-            req = requests.get(url, timeout=TIMEOUT)
+            req = requests.get(url, timeout=TIMEOUT, proxies=PROXIES)
             retries = 0
         except (ConnectTimeout, ConnectionError, SSLError, ReadTimeout):
             retries = retries + 1
@@ -155,7 +159,7 @@ def QA_fetch_huobi_kline(
     )
     while (retries != 0):
         try:
-            req = requests.get(url, timeout=TIMEOUT)
+            req = requests.get(url, timeout=TIMEOUT, proxies=PROXIES)
             # 防止频率过快被断连
             time.sleep(0.5)
             retries = 0

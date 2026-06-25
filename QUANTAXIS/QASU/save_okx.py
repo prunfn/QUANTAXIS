@@ -42,11 +42,11 @@ from QUANTAXIS.QAUtil.QADate_Adv import (
     QA_util_datetime_to_Unix_timestamp,
     QA_util_print_timestamp
 )
-from QUANTAXIS.QAFetch.QAOKEx import (
-    QA_fetch_okex_symbols,
-    QA_fetch_okex_kline,
-    QA_fetch_okex_kline_min,
-    OKEx2QA_FREQUENCY_DICT
+from QUANTAXIS.QAFetch.QAOKX import (
+    QA_fetch_okx_symbols,
+    QA_fetch_okx_kline,
+    QA_fetch_okx_kline_min,
+    OKX2QA_FREQUENCY_DICT
 )
 from QUANTAXIS.QAUtil.QAcrypto import (
     QA_util_save_raw_symbols,
@@ -56,31 +56,31 @@ from QUANTAXIS.QAFetch.QAQuery import (QA_fetch_cryptocurrency_list)
 
 import pymongo
 
-# OKEx的历史数据只提供2000个bar
-OKEx_MIN_DATE = datetime.datetime(2017, 10, 1, tzinfo=tzutc())
-OKEx_EXCHANGE = 'OKEX'
-OKEx_SYMBOL = 'OKEX.{}'
+# OKX的历史数据只提供2000个bar
+OKX_MIN_DATE = datetime.datetime(2017, 10, 1, tzinfo=tzutc())
+OKX_EXCHANGE = 'OKX'
+OKX_SYMBOL = 'OKX.{}'
 
 
-def QA_SU_save_okex(frequency):
+def QA_SU_save_okx(frequency):
     """
-    Save OKEx kline "smart"
+    Save OKX kline "smart"
     """
-    if (frequency not in ["1d", '86400', "1day", "day"]):
-        return QA_SU_save_okex_min(frequency)
+    if (frequency not in ["1d", '86400', "1day", "day", "1D"]):
+        return QA_SU_save_okx_min(frequency)
     else:
-        return QA_SU_save_okex_day(frequency)
+        return QA_SU_save_okx_day(frequency)
 
 
-def QA_SU_save_okex_day(
-    frequency='86400', 
+def QA_SU_save_okx_day(
+    frequency='1D',
     ui_log=None, 
     ui_progress=None):
     """
-    Save OKEx day kline K线 日线数据，统一转化字段保存数据为 crypto_asset_day
+    Save OKX day kline K线 日线数据，统一转化字段保存数据为 crypto_asset_day
     """
-    symbol_template = OKEx_SYMBOL
-    symbol_list = QA_fetch_cryptocurrency_list(OKEx_EXCHANGE)
+    symbol_template = OKX_SYMBOL
+    symbol_list = QA_fetch_cryptocurrency_list(OKX_EXCHANGE)
     col = DATABASE.cryptocurrency_day
     col.create_index(
         [
@@ -95,7 +95,7 @@ def QA_SU_save_okex_day(
     end = datetime.datetime.now(tzutc())
 
     QA_util_log_info(
-        'Starting DOWNLOAD PROGRESS of day Klines from {:s}... '.format(OKEx_EXCHANGE),
+        'Starting DOWNLOAD PROGRESS of day Klines from {:s}... '.format(OKX_EXCHANGE),
         ui_log=ui_log,
         ui_progress=ui_progress
     )
@@ -130,7 +130,7 @@ def QA_SU_save_okex_day(
             QA_util_log_info(
                 'UPDATE_SYMBOL "{}" Trying updating "{}" from {} to {}'.format(
                     symbol_template.format(symbol_info['symbol']),
-                    OKEx2QA_FREQUENCY_DICT[frequency],
+                    OKX2QA_FREQUENCY_DICT[frequency],
                     QA_util_timestamp_to_str(start_time),
                     QA_util_timestamp_to_str(end)
                 ),
@@ -140,14 +140,14 @@ def QA_SU_save_okex_day(
             # 查询到 Kline 缺漏，点抓取模式，按缺失的时间段精确请求K线数据
             missing_data_list = QA_util_find_missing_kline(
                 symbol_template.format(symbol_info['symbol']),
-                OKEx2QA_FREQUENCY_DICT[frequency],
+                OKX2QA_FREQUENCY_DICT[frequency],
             )[::-1]
         else:
-            start_time = OKEx_MIN_DATE
+            start_time = OKX_MIN_DATE
             QA_util_log_info(
                 'NEW_SYMBOL "{}" Trying downloading "{}" from {} to {}'.format(
                     symbol_template.format(symbol_info['symbol']),
-                    OKEx2QA_FREQUENCY_DICT[frequency],
+                    OKX2QA_FREQUENCY_DICT[frequency],
                     QA_util_timestamp_to_str(start_time),
                     QA_util_timestamp_to_str(end)
                 ),
@@ -199,7 +199,7 @@ def QA_SU_save_okex_day(
                 QA_util_log_info(
                     'Fetch "{:s}" slices "{:s}" kline：{:s} to {:s}'.format(
                         symbol_template.format(symbol_info['symbol']),
-                        OKEx2QA_FREQUENCY_DICT[frequency],
+                        OKX2QA_FREQUENCY_DICT[frequency],
                         QA_util_timestamp_to_str(
                             missing_data_list[i][expected]
                         )[2:16],
@@ -208,12 +208,12 @@ def QA_SU_save_okex_day(
                         )[2:16]
                     )
                 )
-                data = QA_fetch_okex_kline(
+                data = QA_fetch_okx_kline(
                     symbol_info['symbol'],
                     time.mktime(start_time.utctimetuple()),
                     time.mktime(end.utctimetuple()),
                     frequency,
-                    callback_func=QA_SU_save_data_okex_callback
+                    callback_func=QA_SU_save_data_okx_callback
                 )
 
         if data is None:
@@ -228,21 +228,21 @@ def QA_SU_save_okex_day(
             )
             continue
     QA_util_log_info(
-        'DOWNLOAD PROGRESS of day Klines from {:s} accomplished.'.format(OKEx_EXCHANGE),
+        'DOWNLOAD PROGRESS of day Klines from {:s} accomplished.'.format(OKX_EXCHANGE),
         ui_log=ui_log,
         ui_progress=ui_progress
     )
 
 
-def QA_SU_save_okex_min(
-    frequency='60', 
+def QA_SU_save_okx_min(
+    frequency='1m',
     ui_log=None, 
     ui_progress=None):
     """
-    Save OKEx min kline 分钟线数据，统一转化字段保存数据为 crypto_asset_min
+    Save OKX min kline 分钟线数据，统一转化字段保存数据为 crypto_asset_min
     """
-    symbol_template = OKEx_SYMBOL
-    symbol_list = QA_fetch_cryptocurrency_list(OKEx_EXCHANGE)
+    symbol_template = OKX_SYMBOL
+    symbol_list = QA_fetch_cryptocurrency_list(OKX_EXCHANGE)
     col = DATABASE.cryptocurrency_min
     col.create_index(
         [
@@ -269,7 +269,7 @@ def QA_SU_save_okex_min(
     end = datetime.datetime.now(tzutc())
 
     QA_util_log_info(
-        'Starting DOWNLOAD PROGRESS of min Klines from {:s}... '.format(OKEx_EXCHANGE),
+        'Starting DOWNLOAD PROGRESS of min Klines from {:s}... '.format(OKX_EXCHANGE),
         ui_log=ui_log,
         ui_progress=ui_progress
     )
@@ -293,7 +293,7 @@ def QA_SU_save_okex_min(
         )
         query_id = {
             "symbol": symbol_template.format(symbol_info['symbol']),
-            'type': OKEx2QA_FREQUENCY_DICT[frequency]
+            'type': OKX2QA_FREQUENCY_DICT[frequency]
         }
         ref = col.find(query_id).sort('time_stamp', -1)
 
@@ -306,7 +306,7 @@ def QA_SU_save_okex_min(
             QA_util_log_info(
                 'UPDATE_SYMBOL "{}" Trying updating "{}" from {} to {}'.format(
                     symbol_template.format(symbol_info['symbol']),
-                    OKEx2QA_FREQUENCY_DICT[frequency],
+                    OKX2QA_FREQUENCY_DICT[frequency],
                     QA_util_timestamp_to_str(start_time),
                     QA_util_timestamp_to_str(end)
                 ),
@@ -317,14 +317,14 @@ def QA_SU_save_okex_min(
             # 查询到 Kline 缺漏，点抓取模式，按缺失的时间段精确请求K线数据
             missing_data_list = QA_util_find_missing_kline(
                 symbol_template.format(symbol_info['symbol']),
-                OKEx2QA_FREQUENCY_DICT[frequency],
+                OKX2QA_FREQUENCY_DICT[frequency],
             )[::-1]
         else:
-            start_time = OKEx_MIN_DATE
+            start_time = OKX_MIN_DATE
             QA_util_log_info(
                 'NEW_SYMBOL "{}" Trying downloading "{}" from {} to {}'.format(
                     symbol_template.format(symbol_info['symbol']),
-                    OKEx2QA_FREQUENCY_DICT[frequency],
+                    OKX2QA_FREQUENCY_DICT[frequency],
                     QA_util_timestamp_to_str(start_time),
                     QA_util_timestamp_to_str(end)
                 ),
@@ -375,7 +375,7 @@ def QA_SU_save_okex_min(
                 QA_util_log_info(
                     'Fetch "{:s}" slices "{:s}" kline：{:s} to {:s}'.format(
                         symbol_template.format(symbol_info['symbol']),
-                        OKEx2QA_FREQUENCY_DICT[frequency],
+                        OKX2QA_FREQUENCY_DICT[frequency],
                         QA_util_timestamp_to_str(
                             missing_data_list[i][expected]
                         )[2:16],
@@ -384,12 +384,12 @@ def QA_SU_save_okex_min(
                         )[2:16]
                     )
                 )
-                data = QA_fetch_okex_kline_min(
+                data = QA_fetch_okx_kline_min(
                     symbol_info['symbol'],
                     start_time=reqParams['from'],
                     end_time=reqParams['to'],
                     frequency=frequency,
-                    callback_func=QA_SU_save_data_okex_callback
+                    callback_func=QA_SU_save_data_okx_callback
                 )
 
         if data is None:
@@ -402,37 +402,37 @@ def QA_SU_save_okex_min(
             )
             continue
     QA_util_log_info(
-        'DOWNLOAD PROGRESS of min Klines from {:s} accomplished.'.format(OKEx_EXCHANGE),
+        'DOWNLOAD PROGRESS of min Klines from {:s} accomplished.'.format(OKX_EXCHANGE),
         ui_log=ui_log,
         ui_progress=ui_progress
     )
 
 
-def QA_SU_save_okex_1min():
-    QA_SU_save_okex('60')
+def QA_SU_save_okx_1min():
+    QA_SU_save_okx('1m')
 
 
-def QA_SU_save_okex_1day():
-    QA_SU_save_okex("86400")
+def QA_SU_save_okx_1day():
+    QA_SU_save_okx("1D")
 
 
-def QA_SU_save_okex_1hour():
-    QA_SU_save_okex("3600")
+def QA_SU_save_okx_1hour():
+    QA_SU_save_okx("1H")
 
 
-def QA_SU_save_okex_symbol(
-    market=OKEx_EXCHANGE,
+def QA_SU_save_okx_symbol(
+    market=OKX_EXCHANGE,
     client=DATABASE,
 ):
     """
-    保存OKEx交易对信息
+    保存OKX交易对信息
     """
     market =  market.upper()
     QA_util_log_info('Downloading {:s} symbol list...'.format(market))
 
-    # 保存 OKEx API 原始 Symbol 数据备查阅，自动交易用得着
+    # 保存 OKX API 原始 Symbol 数据备查阅，自动交易用得着
     raw_symbol_lists = QA_util_save_raw_symbols(
-        QA_fetch_okex_symbols,
+        QA_fetch_okx_symbols,
         market
     )
     if (len(raw_symbol_lists) > 0):
@@ -468,7 +468,8 @@ def QA_SU_save_okex_symbol(
                 'size_increment',
             ],
             axis=1,
-            inplace=True
+            inplace=True,
+            errors='ignore'  # v5 API 可能没有这些旧字段
         )
         if ('_id' in symbol_lists.columns.values):
             # 有时有，必须单独删除
@@ -512,18 +513,18 @@ def QA_SU_save_okex_symbol(
             return symbol_lists
         except:
             QA_util_log_expection(
-                'QA_SU_save_okex_symbol(): Insert_many(symbol) to "cryptocurrency_list" got Exception with {} klines'
+                'QA_SU_save_okx_symbol(): Insert_many(symbol) to "cryptocurrency_list" got Exception with {} klines'
                 .format(len(symbol_lists))
             )
             pass
         return []
 
 
-def QA_SU_save_data_okex_callback(data, freq):
+def QA_SU_save_data_okx_callback(data, freq):
     """
-    异步获取数据回调用的 MongoDB 存储函数，okex返回数据也是时间倒序排列
+    异步获取数据回调用的 MongoDB 存储函数，OKX返回数据也是时间倒序排列
     """
-    symbol_template = OKEx_SYMBOL
+    symbol_template = OKX_SYMBOL
     QA_util_log_info(
         'SYMBOL "{}" Recived "{}" from {} to {} in total {} klines'.format(
             data.iloc[0].symbol,
@@ -610,8 +611,8 @@ def QA_SU_save_data_okex_callback(data, freq):
 
 
 if __name__ == '__main__':
-    QA_SU_save_okex_min('900')
-    QA_SU_save_okex_symbol()
-    #QA_SU_save_okex_1day()
-    #QA_SU_save_okex_1hour()
-    QA_SU_save_okex_1min()
+    QA_SU_save_okx_min('900')
+    QA_SU_save_okx_symbol()
+    #QA_SU_save_okx_1day()
+    #QA_SU_save_okx_1hour()
+    QA_SU_save_okx_1min()

@@ -100,10 +100,10 @@ from QUANTAXIS.QASU.save_huobi import (QA_SU_save_huobi, QA_SU_save_huobi_1day,
                                        QA_SU_save_huobi_1min,
                                        QA_SU_save_huobi_realtime,
                                        QA_SU_save_huobi_symbol)
-from QUANTAXIS.QASU.save_okex import (QA_SU_save_okex, QA_SU_save_okex_1day,
-                                      QA_SU_save_okex_1hour,
-                                      QA_SU_save_okex_1min,
-                                      QA_SU_save_okex_symbol)
+from QUANTAXIS.QASU.save_okx import (QA_SU_save_okx, QA_SU_save_okx_1day,
+                                      QA_SU_save_okx_1hour,
+                                      QA_SU_save_okx_1min,
+                                      QA_SU_save_okx_symbol)
 from QUANTAXIS.QAUtil import (QA_Setting, QA_util_log_info,
                               QA_util_mongo_initial)
 
@@ -345,9 +345,9 @@ class CLI(cmd.Cmd):
             命令格式：save huobi all : 一次性保存火币Pro交易所日/小时/30/15/5/1分钟线数据（耗时很长） \n\
             命令格式：save huobi 1day/1hour/1min/5min/15min/30min : 单独保存火币Pro交易所日/小时/分钟线数据 \n\
             命令格式：save huobi realtime : 接收火币Pro交易所实时行情（仅排名前30的主要币种）\n\
-            命令格式：save okex : 保存OKEx交易所数据 \n\
-            命令格式：save okex all : 一次性保存OKEx交易所日/小时/30/15/5/1分钟线数据（耗时很长） \n\
-            命令格式：save okex 86400/3600/1800/900/300/60 : 单独保存OKEx交易所日/小时/30/15/5/1分钟数据 \n\
+            命令格式：save okx : 保存OKX交易所数据 \n\
+            命令格式：save okx all : 一次性保存OKX交易所日/小时/30/15/5/1分钟线数据（耗时很长） \n\
+            命令格式：save okx 1D/1H/30m/15m/5m/1m : 单独保存OKX交易所日/小时/30/15/5/1分钟数据 \n\
             ----------------------------------------------------------\n\
             if you just want to save daily data just\n\
                 save all+ save stock_block+save stock_info, it about 1G data \n\
@@ -588,23 +588,23 @@ class CLI(cmd.Cmd):
                 else:
                     frequency = arg[1]
                     QA_SU_save_huobi(frequency)
-            elif len(arg) == 1 and arg[0] == "okex":
-                QA_SU_save_okex_symbol()
-                QA_SU_save_okex_1day()
-                QA_SU_save_okex_1hour()
-                QA_SU_save_okex_1min()
-            elif len(arg) == 2 and arg[0] == "okex":
+            elif len(arg) == 1 and arg[0] == "okx":
+                QA_SU_save_okx_symbol()
+                QA_SU_save_okx_1day()
+                QA_SU_save_okx_1hour()
+                QA_SU_save_okx_1min()
+            elif len(arg) == 2 and arg[0] == "okx":
                 if arg[1] == "all":
-                    QA_SU_save_okex_symbol()
-                    QA_SU_save_okex_1day()
-                    QA_SU_save_okex_1hour()
-                    QA_SU_save_okex("1800")
-                    QA_SU_save_okex("900")
-                    QA_SU_save_okex("300")
-                    QA_SU_save_okex_1min()
+                    QA_SU_save_okx_symbol()
+                    QA_SU_save_okx_1day()
+                    QA_SU_save_okx_1hour()
+                    QA_SU_save_okx("30m")
+                    QA_SU_save_okx("15m")
+                    QA_SU_save_okx("5m")
+                    QA_SU_save_okx_1min()
                 else:
                     frequency = arg[1]
-                    QA_SU_save_okex(frequency)
+                    QA_SU_save_okx(frequency)
             elif len(arg) == 1 and arg[0] == "financialfiles":
                 QA_SU_save_financialfiles()
 

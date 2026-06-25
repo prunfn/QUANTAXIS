@@ -81,7 +81,7 @@ class EXCHANGE_ID():
     BINANCE = 'binance' # 币安
     BITMEX = 'bitmex' # BITMEX
     BITFINEX = 'BITFINEX' # BITFINEX
-    OKEX = 'OKEx' # OKEx
+    OKX = 'OKX' # OKX
 
 
 class OFFSET():

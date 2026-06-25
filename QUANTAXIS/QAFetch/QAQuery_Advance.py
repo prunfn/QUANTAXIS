@@ -1043,8 +1043,8 @@ if __name__ == '__main__':
     print(data1.data)
     data2 = QA_fetch_cryptocurrency_min_adv(
             code=[
-                'OKEX.BTC-USDT',
-                'OKEX.ETH-USDT',
+                'OKX.BTC-USDT',
+                'OKX.ETH-USDT',
             ],
             start='2017-10-01',
             end='2020-05-28 18:10:00',

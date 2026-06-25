@@ -55,6 +55,10 @@ TIMEOUT = 10
 ILOVECHINA = "同学！！你知道什么叫做科学上网么？ 如果你不知道的话，那么就加油吧！蓝灯，喵帕斯，VPS，阴阳师，v2ray，随便什么来一个！我翻墙我骄傲！"
 Binance_base_url = "https://api.binance.com"
 
+import os as _os
+_proxy_url = _os.environ.get('QA_PROXY') or _os.environ.get('HTTPS_PROXY') or _os.environ.get('https_proxy') or _os.environ.get('HTTP_PROXY') or _os.environ.get('http_proxy') or ''
+PROXIES = {'http': _proxy_url, 'https': _proxy_url} if _proxy_url else None
+
 column_names = [
     'start_time',
     'open',
@@ -160,7 +164,7 @@ def QA_fetch_binance_symbols():
     datas = list()
     while (retries != 0):
         try:
-            req = requests.get(url, timeout=TIMEOUT)
+            req = requests.get(url, timeout=TIMEOUT, proxies=PROXIES)
             retries = 0
         except (ConnectTimeout, ConnectionError, SSLError, ReadTimeout):
             retries = retries + 1
@@ -201,6 +205,7 @@ def QA_fetch_binance_kline_with_auto_retry(
         try:
             req = requests.get(
                 url,
+                proxies=PROXIES,
                 params={
                     "symbol": symbol,
                     "interval": frequency,
@@ -243,7 +248,7 @@ def QA_fetch_binance_kline(
     Get the latest symbol‘s candlestick data
     时间倒序切片获取算法，是各大交易所获取1min数据的神器，因为大部分交易所直接请求跨月跨年的1min分钟数据
     会直接返回空值，只有将 start_epoch，end_epoch 切片细分到 200/300 bar 以内，才能正确返回 kline，
-    火币和binance，OKEx 均为如此，直接用跨年时间去直接请求上万bar 的 kline 数据永远只返回最近200条数据。
+    火币和binance，OKX 均为如此，直接用跨年时间去直接请求上万bar 的 kline 数据永远只返回最近200条数据。
     """
     datas = list()
     reqParams = {}
@@ -315,7 +320,7 @@ def QA_fetch_binance_kline_min(
     Get the latest symbol‘s candlestick data with time slices
     时间倒序切片获取算法，是各大交易所获取1min数据的神器，因为大部分交易所直接请求跨月跨年的1min分钟数据
     会直接返回空值，只有将 start_epoch，end_epoch 切片细分到 200/300 bar 以内，才能正确返回 kline，
-    火币和binance，OKEx 均为如此，用上面那个函数的方式去直接请求上万bar 的分钟 kline 数据是不会有结果的。
+    火币和binance，OKX 均为如此，用上面那个函数的方式去直接请求上万bar 的分钟 kline 数据是不会有结果的。
     """
     reqParams = {}
     reqParams['from'] = end_time - FREQUENCY_SHIFTING[frequency]

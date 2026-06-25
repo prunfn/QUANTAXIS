@@ -28,7 +28,7 @@ QAFetch - QUANTAXIS 数据获取模块
 该模块提供统一的金融数据获取接口，支持多种数据源：
 - 股票市场：TDX、Tushare、同花顺等
 - 期货市场：通达信期货、CTP等
-- 数字货币：Binance、Huobi、OKEx等
+- 数字货币：Binance、Huobi、OKX等
 - 港股美股：通达信、Tushare等
 
 主要功能：

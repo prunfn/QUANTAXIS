@@ -893,12 +893,12 @@ class MARKET_PRESET:
                 },
             'OK':
                 {
-                    'name': 'OKEx',
+                    'name': 'OKX',
                     'unit_table': 1.0,
                     'price_tick': 1.0,
                     'buy_frozen_coeff': 0.06,
                     'sell_frozen_coeff': 0.06,
-                    'exchange': EXCHANGE_ID.OKEX,
+                    'exchange': EXCHANGE_ID.OKX,
                     'commission_coeff_peramount': 0.002,
                     'commission_coeff_pervol': 0,
                     'commission_coeff_today_peramount': 0.002,

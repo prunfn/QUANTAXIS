@@ -221,7 +221,7 @@ def QA_fetch_bitmex_kline(
     Get the latest symbol‘s candlestick data
     时间倒序切片获取算法，是各大交易所获取1min数据的神器，因为大部分交易所直接请求跨月跨年的1min分钟数据
     会直接返回空值，只有将 start_epoch，end_epoch 切片细分到 200/300 bar 以内，才能正确返回 kline，
-    火币和Bitmex，OKEx 均为如此，直接用跨年时间去直接请求上万bar 的 kline 数据永远只返回最近200条数据。
+    火币和Bitmex，OKX 均为如此，直接用跨年时间去直接请求上万bar 的 kline 数据永远只返回最近200条数据。
     """
     datas = list()
     reqParams = {}
@@ -293,7 +293,7 @@ def QA_fetch_bitmex_kline_min(
     Get the latest symbol‘s candlestick data with time slices
     时间倒序切片获取算法，是各大交易所获取1min数据的神器，因为大部分交易所直接请求跨月跨年的1min分钟数据
     会直接返回空值，只有将 start_epoch，end_epoch 切片细分到 1000 bar 以内，才能正确返回 kline，
-    火币和Bitmex，OKEx 均为如此，用上面那个函数的方式去直接请求上万bar 的分钟 kline 数据是不会有结果的。
+    火币和Bitmex，OKX 均为如此，用上面那个函数的方式去直接请求上万bar 的分钟 kline 数据是不会有结果的。
     """
     reqParams = {}
     reqParams['from'] = end_time - FREQUENCY_SHIFTING[frequency]
